@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:bubble/bubble.dart';
+import 'package:chatbotf/api.dart';
 import 'package:chatbotf/my_flutter_app_icons.dart';
 import 'package:chatbotf/style.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,7 @@ class Discution extends StatefulWidget {
 class DiscutionState extends State<Discution> {
   final GlobalKey<AnimatedListState> _listeKey = GlobalKey();
   List<String> _data = [];
-  var BOT_URL = Uri.parse(
-      'https://gitlab.com/elchebbi.ahmed/testtt/-/raw/main/testFile.json?fbclid=IwAR3QXr41SQS9-i9o6RjdKgc5ruQ7LI_8jEnOGEYZHwr9gi_o5UmpCIsoqxk');
+  var BOT_URL ='https://gitlab.com/elchebbi.ahmed/testtt/-/raw/main/testFile.json?fbclid=IwAR3QXr41SQS9-i9o6RjdKgc5ruQ7LI_8jEnOGEYZHwr9gi_o5UmpCIsoqxk';
 
   TextEditingController queryController = TextEditingController();
   @override
@@ -222,21 +223,16 @@ class DiscutionState extends State<Discution> {
     );
   }
 
-  void getResponse() {
+  void getResponse() async{
     if (queryController.text.length > 0) {
       this.insertSingleItem(queryController.text);
-      var client = getClient();
       try {
-        client.post(
-          BOT_URL,
-          body: {"query": queryController.text},
-        )..then((response) {
-            print(response.body);
-            Map<String, dynamic> data = jsonDecode(response.body);
-            insertSingleItem(data['response'] + "<bot");
-          });
+        Map<String,dynamic> params=new Map();
+        params['query']=queryController.text;
+        var data = await postAPI(BOT_URL, params);
+        var data2=jsonDecode(data);
+        insertSingleItem(data2["msg"]+ "<bot");
       } finally {
-        client.close();
         queryController.clear();
       }
     }
